@@ -11,7 +11,7 @@ exports.createBill = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-// ✅ Fetch All Bills
+// Fetch All Bills
 exports.getAllBills = async (req, res) => {
     try {
       const bills = await Bill.find().sort({ createdAt: -1 }); // latest first
@@ -22,7 +22,7 @@ exports.getAllBills = async (req, res) => {
     }
   };
   
-  // ✅ Fetch Single Bill by ID
+  //Fetch Single Bill by ID
   exports.getBillById = async (req, res) => {
     try {
       const bill = await Bill.findById(req.params.id);

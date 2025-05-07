@@ -22,11 +22,11 @@ exports.createPaymentIntent = async (req, res) => {
       metadata,
     });
 
-    console.log("✅ Created Payment Intent:", paymentIntent.id);
+    console.log("Created Payment Intent:", paymentIntent.id);
 
     res.status(200).json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error("❌ Error creating PaymentIntent:", error.message);
+    console.error("Error creating PaymentIntent:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -39,12 +39,12 @@ exports.stripeWebhook = async (req, res) => {
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
-    console.log(`⚡ Stripe event received: ${event.type}`);
+    console.log(`Stripe event received: ${event.type}`);
 
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object;
 
-      console.log("✅ Payment succeeded. Saving to MongoDB...");
+      console.log("Payment succeeded. Saving to MongoDB...");
 
       const newPayment = new Payment({
         paymentIntentId: paymentIntent.id,
@@ -55,12 +55,12 @@ exports.stripeWebhook = async (req, res) => {
       });
 
       await newPayment.save();
-      console.log("💾 Payment saved successfully to MongoDB!");
+      console.log("Payment saved successfully to MongoDB!");
     }
 
     res.status(200).json({ received: true });
   } catch (error) {
-    console.error("⚠️ Stripe Webhook error:", error.message);
+    console.error("Stripe Webhook error:", error.message);
     res.status(400).send(`Webhook Error: ${error.message}`);
   }
 };
