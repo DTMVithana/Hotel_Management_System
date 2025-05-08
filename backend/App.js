@@ -11,7 +11,7 @@ const paymentRoutes = require("./routes/Dineth_routes/paymentRoutes");
 const billRoutes = require("./routes/Dineth_routes/billRoutes");
 
 // Import controllers
-const paymentController = require("./controllers/Dineth_controllers/paymentController"); // ✅ Import your payment controller
+const paymentController = require("./controllers/Dineth_controllers/paymentController"); 
 
 const app = express();
 
@@ -32,6 +32,18 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/bills", billRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/booking-history", bookingHistoryRoutes);
+
+
+// ML prediction route proxy
+app.post("/api/hotel-predict", async (req, res) => {
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/predict", req.body);
+    res.json(response.data);
+  } catch (error) {
+    console.error("Prediction failed:", error.message);
+    res.status(500).json({ error: "Prediction failed" });
+  }
+});
 
 
 // Root route
