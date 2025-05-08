@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Image, Save, Home, Bed, DollarSign, Box, FileText } from "lucide-react";
+import {
+  ChevronLeft, Image, Save, Home, Bed,
+  DollarSign, Box, FileText
+} from "lucide-react";
+import PredictPopup from "../ML_pages/predict_price"; // Update path as needed
 
 const UpdateRoom = () => {
   const { id } = useParams();
@@ -16,6 +20,8 @@ const UpdateRoom = () => {
     description: "",
     images: [],
   });
+
+  const [showPredict, setShowPredict] = useState(false);
 
   useEffect(() => {
     axios.get(`/api/rooms/${id}`)
@@ -70,6 +76,7 @@ const UpdateRoom = () => {
           <form className="p-8" onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                 {/* Room Number */}
                 <div className="space-y-2">
                   <label className="flex items-center text-gray-700 font-medium">
@@ -103,12 +110,15 @@ const UpdateRoom = () => {
                   </select>
                 </div>
 
-                {/* Price */}
+                {/* Price + Predict Button */}
                 <div className="space-y-2">
                   <label className="flex items-center text-gray-700 font-medium">
                     <DollarSign className="w-4 h-4 mr-2 text-blue-600" /> Price
                   </label>
                   <input name="price" type="number" value={roomData.price} onChange={handleChange} className="w-full border border-gray-300 pl-4 py-3 rounded-lg" placeholder="150" />
+                  <button type="button" onClick={() => setShowPredict(true)} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                    Predict Price
+                  </button>
                 </div>
 
                 {/* Size */}
@@ -154,6 +164,16 @@ const UpdateRoom = () => {
           </form>
         </div>
       </div>
+
+      {/* Predict Popup Modal */}
+      {showPredict && (
+        <PredictPopup
+          onClose={() => setShowPredict(false)}
+          onPredict={(predictedValue) =>
+            setRoomData(prev => ({ ...prev, price: predictedValue }))
+          }
+        />
+      )}
     </div>
   );
 };
