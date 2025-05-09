@@ -7,6 +7,8 @@ const PredictPopup = ({ onClose, onPredict }) => {
   const seasons = ["Winter", "Summer", "Spring", "Fall"];
   const months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
   const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const [basePriceError, setBasePriceError] = useState("");
+
 
   const [form, setForm] = useState({
     Base_Price: "",
@@ -25,23 +27,33 @@ const PredictPopup = ({ onClose, onPredict }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        ...form,
-        Base_Price: parseFloat(form.Base_Price),
-        Year: parseInt(form.Year),
-        No_of_Guests: parseInt(form.No_of_Guests),
-      };
-      const res = await axios.post("http://localhost:8000/predict", payload);
-      setPrediction(res.data.predicted_price_LKR);
-      onPredict(res.data.predicted_price_LKR);
-      onClose();
-    } catch (err) {
-      setError("Prediction failed");
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setBasePriceError("");
+  setError("");
+
+  const basePrice = parseFloat(form.Base_Price);
+  if (isNaN(basePrice) || basePrice <= 0) {
+    setBasePriceError("Base Price must be a positive number.");
+    return;
+  }
+
+  try {
+    const payload = {
+      ...form,
+      Base_Price: basePrice,
+      Year: parseInt(form.Year),
+      No_of_Guests: parseInt(form.No_of_Guests),
+    };
+    const res = await axios.post("http://localhost:8000/predict", payload);
+    setPrediction(res.data.predicted_price_LKR);
+    onPredict(res.data.predicted_price_LKR);
+    onClose();
+  } catch (err) {
+    setError("Prediction failed");
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -64,6 +76,10 @@ const PredictPopup = ({ onClose, onPredict }) => {
                 className="w-full border px-4 py-2 rounded"
                 required
               />
+
+                 {name === "Base_Price" && basePriceError && (
+      <p className="text-red-500 text-sm mt-1">{basePriceError}</p>
+    )}
             </div>
           ))}
 
