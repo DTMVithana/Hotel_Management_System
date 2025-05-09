@@ -38,7 +38,9 @@ const BookedRooms = () => {
   const [filteredTableBookings, setFilteredTableBookings] = useState([]);
   const [selectedBookedDates, setSelectedBookedDates] = useState([]);
   const [toast, setToast] = useState(null);
-
+  const [roomNumber, setRoomNumber] = useState("");
+  const [checkInDate, setCheckInDate] = useState("");
+  const [checkOutDate, setCheckOutDate] = useState("");
   const location = useLocation();
   const incomingRoomNumber = location.state?.roomNumber || null;
 
@@ -99,31 +101,34 @@ const BookedRooms = () => {
     return dates;
   };
 
-  const handleFilter = ({ roomNumber, checkInDate, checkOutDate }) => {
-    let filtered = [...originalData];
-
-    if (roomNumber.trim()) {
-      filtered = filtered.filter((room) =>
-        room.roomNumber.toLowerCase().includes(roomNumber.toLowerCase())
-      );
-    }
-
-    if (checkInDate && checkOutDate) {
-      const filterStart = new Date(checkInDate);
-      const filterEnd = new Date(checkOutDate);
-
-      filtered = filtered.filter((booking) => {
-        const bookingStart = new Date(booking.checkInDate);
-        const bookingEnd = new Date(booking.checkOutDate);
-        return bookingStart <= filterEnd && bookingEnd >= filterStart;
-      });
-    }
-
-    setBookedRooms(filtered);
-    setFilteredTableBookings(filtered);
-    // Clear selected dates when filtering
-    setSelectedBookedDates([]);
-  };
+    const handleFilter = ({ roomNumber, checkInDate, checkOutDate }) => {
+      let filtered = [...originalData];
+    
+      
+        if (roomNumber.trim()) {
+          filtered = filtered.filter(b =>
+            b.roomNumber.toLowerCase().includes(roomNumber.toLowerCase())
+          );
+        }
+    
+       
+        
+        if (checkInDate && checkOutDate) {
+          const filterStart = new Date(checkInDate);
+          const filterEnd   = new Date(checkOutDate);
+    
+          filtered = filtered.filter(booking => {
+            const bs = new Date(booking.checkInDate);
+            const be = new Date(booking.checkOutDate);
+            return bs <= filterEnd && be >= filterStart;
+          });
+        }
+    
+    
+    //     setBookedRooms(filtered);
+        setFilteredTableBookings(filtered);
+        setSelectedBookedDates([]); 
+      };
 
   const handleRoomClick = (roomNumber) => {
     const filtered = originalData.filter((room) => room.roomNumber === roomNumber);
@@ -239,7 +244,15 @@ const BookedRooms = () => {
           <h2 className="text-lg font-semibold text-gray-700 mb-3">
             Search & Filter
           </h2>
-          <BookedRoomsFilter onFilter={handleFilter} />
+          <BookedRoomsFilter
+        roomNumber={roomNumber}
+          setRoomNumber={setRoomNumber}
+         checkInDate={checkInDate}
+         setCheckInDate={setCheckInDate}
+         checkOutDate={checkOutDate}
+         setCheckOutDate={setCheckOutDate}
+          onFilter={handleFilter}
+        />
         </motion.div>
 
         <div className="flex flex-col lg:flex-row gap-5">
@@ -306,9 +319,11 @@ const BookedRooms = () => {
                   transition={{ duration: 0.2 }}
                 >
                   <RoomGrid
-                    rooms={bookedRooms}
+                    // rooms={bookedRooms}
+                    rooms={originalData}
+                    bookings={originalData}
                     mode="booked"
-                    bookings={bookedRooms}
+                    // bookings={bookedRooms}
                     onRoomClick={handleRoomClick}
                   />
                 </motion.div>
