@@ -116,4 +116,4 @@ const handleSubmit = async (e) => {
   );
 };
 
-export default PredictPopup;
+export default PredictPopup;

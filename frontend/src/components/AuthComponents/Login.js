@@ -42,14 +42,19 @@ const Login = ({ onLogin }) => {
           onLogin(data.user, data.token);
         }
         
+        // Determine redirect path based on user role
+        const redirectPath = data.user.role === 'admin' ? '/dashboard' : '/roomsUI';
+
         toast.success('Welcome back! Login successful.');
-        navigate('/dashboard');
+        setTimeout(() => {
+          navigate(redirectPath);
+        }, 2000);
       } else {
         throw new Error('Invalid response from server');
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.message || 'Login failed. Please check your credentials.');
+      toast.error(error.message || 'Login failed. Please check your credentials.', );
     } finally {
       setIsLoading(false);
     }
@@ -175,9 +180,9 @@ const Login = ({ onLogin }) => {
                 </label>
               </div>
               <div className="text-sm">
-                <Link to="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+                {/* <Link to="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
                   Forgot password?
-                </Link>
+                </Link> */}
               </div>
             </div>
             

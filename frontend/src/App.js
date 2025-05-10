@@ -167,6 +167,7 @@ function App() {
 
 
 
+
               {/* Admin only routes */}
               <Route path="/guest-management" element={<ProtectedRoute element={<GuestManagementDashboard />} requiredRole="admin" />} />
               <Route path="/staff" element={<ProtectedRoute element={<StaffList />} requiredRole="admin" />} />
