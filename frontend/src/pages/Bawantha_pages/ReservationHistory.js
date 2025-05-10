@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-
+import ReservationHistoryFilter from "../../components/Bawantha_components/ReservationHistoryFilter";
 // Components
 import ReservationHistoryTable from "../../components/Bawantha_components/ReservationHistoryTable";
 import jsPDF from "jspdf";
@@ -202,47 +202,41 @@ const ReservationHistory = () => {
           className="bg-white p-5 shadow-lg rounded-lg mb-6 border-l-4 border-blue-500"
           variants={itemVariants}
         >
+          <ReservationHistoryFilter
+           searchQuery={searchQuery}
+           setSearchQuery={setSearchQuery}
+           startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}          onFilter={({ searchQuery, startDate, endDate }) => {
+             let filtered = [...reservations];
+             if (startDate && endDate) {
+               filtered = filtered.filter(r => {
+                const d = new Date(r.checkInDate);
+                 return d >= new Date(startDate) && d <= new Date(endDate);
+               });
+             }
+             if (searchQuery.trim()) {
+               const q = searchQuery.toLowerCase();
+               filtered = filtered.filter(r =>
+                 r._id.toLowerCase().includes(q) ||
+                 r.customerName.toLowerCase().includes(q) ||
+                 r.roomNumber.toLowerCase().includes(q) ||
+                 r.nic.toLowerCase().includes(q) ||
+                 r.phone.toLowerCase().includes(q)
+               );
+             }
+             setFilteredReservations(filtered);
+           }}
+         />
+       
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="w-full md:w-1/3">
-              <label className="block text-gray-600 text-sm mb-1">Search:</label>
-              <input
-                type="text"
-                placeholder="Search by name, ID, room..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="border border-gray-300 p-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all"
-              />
-            </div>
+            
 
             <div className="flex flex-wrap md:flex-nowrap gap-4 w-full md:w-auto">
-              <div>
-                <label className="block text-gray-600 text-sm mb-1">From:</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-600 text-sm mb-1">To:</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all"
-                />
-              </div>
-              <div className="self-end">
-                <motion.button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-                  onClick={filterReservations}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Filter
-                </motion.button>
-              </div>
+              
+             
+              
             </div>
 
             <div className="self-end">

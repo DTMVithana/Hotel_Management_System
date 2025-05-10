@@ -6,6 +6,8 @@ const PredictPopup = ({ onClose, onPredict }) => {
   const seasons = ["Winter", "Summer", "Spring", "Fall"];
   const months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
   const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const [basePriceError, setBasePriceError] = useState("");
+
 
   const [form, setForm] = useState({
     Base_Price: "",
@@ -36,6 +38,7 @@ const PredictPopup = ({ onClose, onPredict }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+<<<<<<< HEAD
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -63,6 +66,35 @@ const PredictPopup = ({ onClose, onPredict }) => {
       setIsLoading(false);
     }
   };
+=======
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setBasePriceError("");
+  setError("");
+
+  const basePrice = parseFloat(form.Base_Price);
+  if (isNaN(basePrice) || basePrice <= 0) {
+    setBasePriceError("Base Price must be a positive number.");
+    return;
+  }
+
+  try {
+    const payload = {
+      ...form,
+      Base_Price: basePrice,
+      Year: parseInt(form.Year),
+      No_of_Guests: parseInt(form.No_of_Guests),
+    };
+    const res = await axios.post("http://localhost:8000/predict", payload);
+    setPrediction(res.data.predicted_price_LKR);
+    onPredict(res.data.predicted_price_LKR);
+    onClose();
+  } catch (err) {
+    setError("Prediction failed");
+  }
+};
+
+>>>>>>> 94248c7c66497e90e6763802d25691b0214abae7
 
   // Sections for form organization
   const renderSectionTitle = (title) => (
@@ -70,6 +102,7 @@ const PredictPopup = ({ onClose, onPredict }) => {
   );
 
   return (
+<<<<<<< HEAD
     <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-md flex items-center justify-center z-50 transition-all duration-300">
       <div className="bg-white bg-opacity-95 p-4 rounded-xl w-[450px] max-h-[80vh] overflow-y-auto shadow-2xl relative border border-gray-100">
         {/* Decorative elements */}
@@ -94,6 +127,60 @@ const PredictPopup = ({ onClose, onPredict }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
+=======
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-[500px] max-h-[90vh] overflow-y-auto shadow-lg relative">
+        <h2 className="text-xl font-semibold mb-4">Predict Hotel Room Price</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {[
+            { name: "Base_Price", label: "Base Price (LKR)", type: "number" },
+            { name: "Year", label: "Year", type: "number" },
+            { name: "No_of_Guests", label: "Number of Guests", type: "number" },
+          ].map(({ name, label, type }) => (
+            <div key={name}>
+              <label htmlFor={name} className="block mb-1 font-medium">{label}</label>
+              <input
+                id={name}
+                name={name}
+                type={type}
+                value={form[name]}
+                onChange={handleChange}
+                className="w-full border px-4 py-2 rounded"
+                required
+              />
+
+                 {name === "Base_Price" && basePriceError && (
+      <p className="text-red-500 text-sm mt-1">{basePriceError}</p>
+    )}
+            </div>
+          ))}
+
+          {[
+            { name: "Room_Type", label: "Room Type", options: roomTypes },
+            { name: "Season", label: "Season", options: seasons },
+            { name: "Month", label: "Month", options: months },
+            { name: "Weekday", label: "Weekday", options: weekdays },
+          ].map(({ name, label, options }) => (
+            <div key={name}>
+              <label htmlFor={name} className="block mb-1 font-medium">{label}</label>
+              <select
+                id={name}
+                name={name}
+                value={form[name]}
+                onChange={handleChange}
+                className="w-full border px-4 py-2 rounded"
+                required
+              >
+                <option value="">-- Select {label} --</option>
+                {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+              </select>
+            </div>
+          ))}
+
+          <div className="flex justify-end mt-4 gap-2">
+            <button type="button" onClick={onClose} className="bg-gray-200 px-4 py-2 rounded">Cancel</button>
+            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Predict</button>
+>>>>>>> 94248c7c66497e90e6763802d25691b0214abae7
           </div>
 
           <p className="text-gray-600 text-sm mb-3">

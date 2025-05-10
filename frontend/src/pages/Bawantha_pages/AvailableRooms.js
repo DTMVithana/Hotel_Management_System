@@ -7,7 +7,7 @@ import { Hotel, X, BedDouble, AlertTriangle, CheckCircle2 } from "lucide-react";
 // Components
 import AvailableRoomsTable from "../../components/Bawantha_components/AvailableRoomsTable";
 import RoomGrid from "../../components/Bawantha_components/RoomGrid";
-import Filters from "../../components/Bawantha_components/Filters";
+import AvailableRoomsFilter from "../../components/Bawantha_components/AvailableRoomsFilter";
 import { useNavigate } from 'react-router-dom';
 
 const Toast = ({ type, message, onClose }) => {
@@ -126,12 +126,19 @@ const AvailableRooms = () => {
     filterRooms({ searchTerm, selectedDate, acFilter: acType, bedType });
   }, [searchTerm, selectedDate, acType, bedType, filterRooms]);
 
-  const visibleRooms = filteredRooms.filter(
-    (room) => !bookedRoomNumbers.includes(room.roomNumber)
-  );
-
+  
+  
+  
+    const allAvailableRooms = rooms.filter(
+      (room) => !bookedRoomNumbers.includes(room.roomNumber)
+    );
+  
+  
+    const tableRooms = filteredRooms.filter(
+      (room) => !bookedRoomNumbers.includes(room.roomNumber)
+    );
   const handleRoomClick = (roomNumber) => {
-    const isAvailable = visibleRooms.some((r) => r.roomNumber === roomNumber);
+    const isAvailable = allAvailableRooms.some((r) => r.roomNumber === roomNumber);
   
     if (isAvailable) {
       setSelectedRoomNumber(roomNumber);
@@ -141,9 +148,9 @@ const AvailableRooms = () => {
     }
   };
 
-  const displayedRooms = selectedRoomNumber
-    ? visibleRooms.filter((room) => room.roomNumber === selectedRoomNumber)
-    : visibleRooms;
+   const displayedRooms = selectedRoomNumber
+     ? tableRooms.filter((room) => room.roomNumber === selectedRoomNumber)
+     : tableRooms;
 
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8 max-w-7xl mx-auto relative">
@@ -180,17 +187,17 @@ const AvailableRooms = () => {
           transition={{ duration: 0.4 }}
           className="bg-white p-4 shadow-sm rounded-lg border border-gray-200 mb-6"
         >
-          <Filters 
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            acType={acType}
-            setAcType={setAcType}
-            bedType={bedType}
-            setBedType={setBedType}
-            onFilter={filterRooms}
-          />
+           <AvailableRoomsFilter 
+    searchTerm={searchTerm}
+    setSearchTerm={setSearchTerm}
+    selectedDate={selectedDate}
+    setSelectedDate={setSelectedDate}
+    acType={acType}
+    setAcType={setAcType}
+    bedType={bedType}
+    setBedType={setBedType}
+    onFilter={filterRooms}
+  />
         </motion.div>
 
         {/* Main Layout */}
@@ -264,8 +271,8 @@ const AvailableRooms = () => {
                   transition={{ duration: 0.2 }}
                 >
                   <RoomGrid
-                    rooms={rooms}
-                    visibleRooms={visibleRooms}
+                    rooms={allAvailableRooms}
+                    visibleRooms={allAvailableRooms}
                     mode="available"
                     onRoomClick={handleRoomClick}
                   />

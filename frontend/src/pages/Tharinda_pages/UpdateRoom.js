@@ -10,6 +10,8 @@ import PredictPopup from "../ML_pages/predict_price"; // Update path as needed
 const UpdateRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [priceError, setPriceError] = useState("");
+
 
   const [roomData, setRoomData] = useState({
     roomNumber: "",
@@ -42,15 +44,27 @@ const UpdateRoom = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.put(`/api/rooms/${id}`, roomData);
-      navigate("/roomsUI");
-    } catch (err) {
-      console.error("Update failed:", err);
-    }
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setPriceError(""); // Reset error
+
+  const parsedPrice = parseFloat(roomData.price);
+  if (isNaN(parsedPrice) || parsedPrice <= 0) {
+    setPriceError("Price must be a positive number.");
+    return;
+  }
+
+  try {
+    await axios.put(`/api/rooms/${id}`, {
+      ...roomData,
+      price: parsedPrice, // Ensure numeric value is sent
+    });
+    navigate("/roomsUI");
+  } catch (err) {
+    console.error("Update failed:", err);
+  }
+};
+
 
   return (
     <div className="min-h-screen p-6 lg:p-8 max-w-7xl mx-auto bg-gray-50">
@@ -115,7 +129,9 @@ const UpdateRoom = () => {
                   <label className="flex items-center text-gray-700 font-medium">
                     <DollarSign className="w-4 h-4 mr-2 text-blue-600" /> Price
                   </label>
-                  <input name="price" type="number" value={roomData.price} onChange={handleChange} className="w-full border border-gray-300 pl-4 py-3 rounded-lg" placeholder="150" />
+                  <input name="price"type="number" value={roomData.price} onChange={handleChange} className="w-full border border-gray-300 pl-4 py-3 rounded-lg" placeholder="150"/>
+                     {priceError && <p className="text-red-500 text-sm mt-1">{priceError}</p>}
+
                   <button type="button" onClick={() => setShowPredict(true)} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
                     Predict Price
                   </button>
