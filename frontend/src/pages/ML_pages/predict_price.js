@@ -38,35 +38,6 @@ const PredictPopup = ({ onClose, onPredict }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-<<<<<<< HEAD
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-    
-    try {
-      const payload = {
-        ...form,
-        Base_Price: parseFloat(form.Base_Price),
-        Year: parseInt(form.Year),
-        No_of_Guests: parseInt(form.No_of_Guests),
-      };
-      const res = await axios.post("http://localhost:8000/predict", payload);
-      setPrediction(res.data.predicted_price_LKR);
-      setShowConfetti(true);
-      
-      // Show animation before closing
-      setTimeout(() => {
-        onPredict(res.data.predicted_price_LKR);
-        onClose();
-      }, 1500);
-    } catch (err) {
-      setError("Prediction failed. Please check your inputs and try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-=======
 const handleSubmit = async (e) => {
   e.preventDefault();
   setBasePriceError("");
@@ -94,7 +65,6 @@ const handleSubmit = async (e) => {
   }
 };
 
->>>>>>> 94248c7c66497e90e6763802d25691b0214abae7
 
   // Sections for form organization
   const renderSectionTitle = (title) => (
@@ -102,36 +72,11 @@ const handleSubmit = async (e) => {
   );
 
   return (
-<<<<<<< HEAD
-    <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-md flex items-center justify-center z-50 transition-all duration-300">
-      <div className="bg-white bg-opacity-95 p-4 rounded-xl w-[450px] max-h-[80vh] overflow-y-auto shadow-2xl relative border border-gray-100">
-        {/* Decorative elements */}
-        <div className="absolute -top-4 -left-4 w-16 h-16 bg-blue-500 rounded-full opacity-20"></div>
-        <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-purple-500 rounded-full opacity-20"></div>
-        
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-800 flex items-center">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Room Price Prediction
-              </span>
-              <span className="ml-1 flex items-center justify-center bg-blue-100 text-blue-800 text-xs font-semibold rounded-full h-5 w-5">
-                AI
-              </span>
-            </h2>
-            <button 
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-=======
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-xl w-[500px] max-h-[90vh] overflow-y-auto shadow-lg relative">
         <h2 className="text-xl font-semibold mb-4">Predict Hotel Room Price</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          
           {[
             { name: "Base_Price", label: "Base Price (LKR)", type: "number" },
             { name: "Year", label: "Year", type: "number" },
@@ -180,7 +125,6 @@ const handleSubmit = async (e) => {
           <div className="flex justify-end mt-4 gap-2">
             <button type="button" onClick={onClose} className="bg-gray-200 px-4 py-2 rounded">Cancel</button>
             <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Predict</button>
->>>>>>> 94248c7c66497e90e6763802d25691b0214abae7
           </div>
 
           <p className="text-gray-600 text-sm mb-3">
