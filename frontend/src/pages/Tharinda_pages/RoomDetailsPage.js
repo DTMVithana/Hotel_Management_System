@@ -1,119 +1,108 @@
-// src/pages/Tharinda_pages/RoomDetailsPage.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
-// Simple Badge component — must be declared _before_ RoomDetailsPage
-const Badge = ({ color, children }) => (
-  <span
-    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-      color === "blue"   ? "bg-blue-100 text-blue-800"
-      : color === "green" ? "bg-green-100 text-green-800"
-      :                    "bg-purple-100 text-purple-800"
-    }`}
-  >
-    {children}
-  </span>
-);
-
 const RoomDetailsPage = () => {
   const { roomNumber } = useParams();
-  const [room, setRoom]       = useState(null);
+  const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        // fetch all rooms
-        const roomsRes    = await axios.get("http://localhost:5000/api/rooms/");
-        const allRooms    = roomsRes.data.data || [];
-        // fetch all bookings
-        const bookingsRes = await axios.get("http://localhost:5000/api/bookings/");
-        const allBookings = bookingsRes.data.data || [];
-
-        // see if this roomNumber is booked
-        const booking = allBookings.find(b => b.roomNumber === roomNumber);
-
-        // pick booking record or room record
-        const rec = booking
-          ? booking
-          : allRooms.find(r => r.roomNumber === roomNumber);
-
-        if (!rec) {
-          throw new Error("Room not found");
-        }
-
-        setRoom({
-          ...rec,
-          status:      booking ? "Booked" : "Available",
-          availability: !booking,
-          images:      Array.isArray(rec.images) ? rec.images : [rec.image || ""],
-        });
-      } catch (e) {
-        console.error(e);
-        setError(e.message);
-      } finally {
+    axios.get("http://localhost:5000/api/rooms/number/" + roomNumber)
+      .then((res) => {
+        setRoom(res.data.data);
         setLoading(false);
-      }
-    };
-
-    load();
+      })
+      .catch((err) => {
+        console.error("Error fetching room:", err);
+        setLoading(false);
+      });
   }, [roomNumber]);
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="mt-4 text-lg text-gray-600">Loading room details...</p>
+      </div>
     </div>
   );
-  if (error) return (
-    <div className="text-center text-red-600 mt-20">{error}</div>
+
+  if (!room) return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="text-center p-6 max-w-md">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Room Not Found</h2>
+        <p className="text-gray-600">We couldn't find details for room {roomNumber}.</p>
+      </div>
+    </div>
   );
 
   return (
-    <div className="min-h-screen p-6 lg:p-8 max-w-4xl mx-auto bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-        {/* Image + Status Badge */}
-        <div className="relative h-96">
-          <img
-            src={room.images[0]}
-            alt={`Room ${room.roomNumber}`}
-            className="w-full h-full object-cover"
-          />
-          <span
-            className={`absolute top-4 left-4 px-3 py-1 rounded-full text-white ${
-              room.status === "Booked" ? "bg-red-500" : "bg-green-500"
-            }`}
-          >
-            {room.status}
-          </span>
-        </div>
-
-        {/* Details */}
-        <div className="p-8">
-          <h1 className="text-3xl font-bold mb-2">Room {room.roomNumber}</h1>
-          <div className="flex space-x-2 mb-4">
-            <Badge color="blue"> {room.roomType} </Badge>
-            <Badge color="green"> {room.bedType} </Badge>
-            <Badge color="purple"> {room.size} </Badge>
+    <div className="min-h-screen p-6 lg:p-8 max-w-7xl mx-auto bg-gray-50">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          {/* Image Gallery */}
+          <div className="relative h-96 overflow-hidden">
+            <img 
+              src={room.images[0]} 
+              alt="Room" 
+              className="w-full h-full object-cover transition-opacity duration-300" 
+            />
+            <div className="absolute bottom-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+              {room.availability ? "Available" : "Booked"}
+            </div>
           </div>
 
-          <p className="text-2xl font-semibold text-blue-600 mb-6">
-            Rs. {room.price} <span className="text-sm text-gray-500">/ night</span>
-          </p>
+          {/* Room Details */}
+          <div className="p-8">
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Room {room.roomNumber}</h1>
+                <div className="flex items-center mt-2 space-x-4">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    {room.roomType}
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    {room.bedType}
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                    {room.size}
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Starting from</p>
+                <p className="text-3xl font-bold text-blue-600">Rs. {room.price}<span className="text-sm font-normal text-gray-500"> / night</span></p>
+              </div>
+            </div>
 
-          {room.description && (
-            <p className="text-gray-700 mb-6">{room.description}</p>
-          )}
+            {/* Divider */}
+            <div className="border-t border-gray-200 my-6"></div>
 
-          <div className="flex space-x-4">
-            <button className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Book Now
-            </button>
-            <button className="px-6 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50">
-              Contact Reception
-            </button>
+            {/* Amenities */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Room Features</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {room.amenities?.map((amenity, index) => (
+                  <div key={index} className="flex items-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span className="text-gray-700">{amenity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Description */}
+            {room.description && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Description</h3>
+                <p className="text-gray-600 leading-relaxed">{room.description}</p>
+              </div>
+            )}
+
+            {/* Action Buttons section removed as requested */}
           </div>
         </div>
       </div>
