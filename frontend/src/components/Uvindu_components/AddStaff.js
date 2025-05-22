@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Sun, SunDim, Moon, Upload, UserPlus, ChevronDown, Building2, Hotel, CheckCircle2, AlertCircle, AlertTriangle, X, CloudSun } from "lucide-react"; 
+import { ChevronLeft, Sun, Moon, Upload, UserPlus, ChevronDown, Hotel, CheckCircle2, AlertTriangle, X, CloudSun } from "lucide-react"; 
 import axios from "axios";
-
 
 const AddStaff = () => {
   const [formData, setFormData] = useState({
@@ -33,7 +32,6 @@ const AddStaff = () => {
   // Navigate function for breadcrumbs
   const navigate = () => {
     window.history.back(); 
-
   };
 
   const departments = {
@@ -109,7 +107,6 @@ const AddStaff = () => {
     ]
   };
   
-
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
     setFormData((prev) => ({
@@ -126,48 +123,63 @@ const AddStaff = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Validation checks
-    if (!formData.department || !formData.jobTitle) {
-      showToast("error", "Please select both department and job title");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    // Check if at least one shift is selected
-    const hasShift = Object.values(formData.shifts).some(value => value);
-    if (!hasShift) {
-      showToast("error", "Please select at least one shift");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    const formDataToSend = new FormData();
-  
-    // Properly append form data for sending to API
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === "shifts") {
-        // Convert shifts object to JSON string to preserve structure
-        formDataToSend.append("shifts", JSON.stringify(value));
-      } else {
-        formDataToSend.append(key, value);
-      }
-    });
-  
-    if (image) {
-      formDataToSend.append("profilePic", image);
-    }
-  
     try {
-      // Remove development check to ensure actual API is called
-      const response = await axios.post("/api/staff", formDataToSend, {
-        headers: { 
-          "Content-Type": "multipart/form-data",
-        },
+      // Validation checks
+      if (!formData.department || !formData.jobTitle) {
+        throw new Error("Please select both department and job title");
+      }
+      
+      // Check if at least one shift is selected
+      const hasShift = Object.values(formData.shifts).some(value => value);
+      if (!hasShift) {
+        throw new Error("Please select at least one shift");
+      }
+      
+      const formDataToSend = new FormData();
+    
+      // Properly append form data for sending to API
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === "shifts") {
+          // Convert shifts object to JSON string to preserve structure
+          formDataToSend.append("shifts", JSON.stringify(value));
+        } else {
+          formDataToSend.append(key, value);
+        }
       });
-  
+    
+      if (image) {
+        formDataToSend.append("profilePic", image);
+      }
+
+      // Add error handling for API connection issues
+      let response;
+      try {
+        response = await axios.post("/api/staff", formDataToSend, {
+          headers: { 
+            "Content-Type": "multipart/form-data",
+          },
+          // Add timeout to prevent long-hanging requests
+          timeout: 10000
+        });
+      } catch (apiError) {
+        // Handle network errors more specifically
+        if (apiError.code === 'ECONNABORTED') {
+          throw new Error("Request timed out. Please try again.");
+        }
+        if (!apiError.response) {
+          throw new Error("Network error. Please check your connection and try again.");
+        }
+        // Rethrow with more details if there's a response
+        throw new Error(
+          apiError.response?.data?.message || 
+          apiError.response?.data?.error || 
+          `Server error (${apiError.response?.status || 'unknown'}). Please try again.`
+        );
+      }
+    
       if (response.status === 201 || response.status === 200) {
         showToast("success", "Staff Member Added Successfully!");
-  
+    
         // Reset the form
         setFormData({
           firstName: "",
@@ -180,19 +192,14 @@ const AddStaff = () => {
         });
         setImage(null);
       } else {
-        // Handle non-201/200 responses
-        showToast("error", `Unexpected response: ${response.status}`);
+        // Handle unexpected successful responses
+        throw new Error(`Unexpected response: ${response.status}`);
       }
     } catch (error) {
       console.error("Error adding staff:", error);
       
-      // Extract the most useful error message to display to the user
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          error.message || 
-                          "Error adding staff member. Please try again.";
-      
-      showToast("error", errorMessage);
+      // Show the error message
+      showToast("error", error.message || "Error adding staff member. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -201,32 +208,26 @@ const AddStaff = () => {
   const Toast = ({ type, message, onClose }) => {
     return (
       <motion.div
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 100 }}
-      className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-3
-        ${type === 'success' 
-          ? 'bg-green-500 text-white' 
-          : 'bg-red-500 text-white'
-        }`}
-    >
-      {type === 'success' ? (
-        <CheckCircle2 size={24} />
-      ) : (
-        <AlertTriangle size={24} />
-      )}
-      <div className="flex-grow">{message}</div>
-      <button onClick={onClose} className="hover:bg-white/20 rounded-full p-1">
-        <X size={20} />
-      </button>
-    </motion.div>
+        initial={{ opacity: 0, x: 100 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 100 }}
+        className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-3
+          ${type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : 'bg-red-500 text-white'
+          }`}
+      >
+        {type === 'success' ? (
+          <CheckCircle2 size={24} />
+        ) : (
+          <AlertTriangle size={24} />
+        )}
+        <div className="flex-grow">{message}</div>
+        <button onClick={onClose} className="hover:bg-white/20 rounded-full p-1">
+          <X size={20} />
+        </button>
+      </motion.div>
     );
-  };
-
-  // Debug function to view current form data
-  const debugFormData = () => {
-    console.log("Current form data:", formData);
-    console.log("Image:", image);
   };
 
   return (
@@ -243,8 +244,7 @@ const AddStaff = () => {
           onClick={() => navigate()}
           className="text-blue-600 hover:text-blue-800 flex items-center"
         >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-
+          <ChevronLeft className="h-4 w-4 mr-1" />
           Dashboard
         </button>
         <span className="mx-2 text-gray-400">/</span>
@@ -260,7 +260,7 @@ const AddStaff = () => {
         {/* Sidebar Image Section */}
         <div className="relative hidden md:block">
           <img 
-            src="https://images.unsplash.com/photo-1554009975-d74653b879f1?q=80&w=2127&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+            src="/api/placeholder/800/900" 
             alt="Hotel Staff Management" 
             className="absolute inset-0 w-full h-full object-cover opacity-60"
           />
@@ -457,7 +457,7 @@ const AddStaff = () => {
                       className="hidden peer"
                     />
                     <motion.div
-                      className="w-12 h-12 border-2 rounded-xl flex items-center justify-center spacebe mb-2"
+                      className="w-12 h-12 border-2 rounded-xl flex items-center justify-center mb-2"
                       animate={{
                         backgroundColor: formData.shifts[shift] ? "#E5E4E2" : "#FFFFFF",
                         borderColor: formData.shifts[shift] ? "#FFFFFF" : "#9CA3AF",
