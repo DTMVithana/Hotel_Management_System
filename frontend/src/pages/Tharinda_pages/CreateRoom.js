@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+// If you don't have a backend setup yet, you can use this alternate implementation
+// that stores room data in localStorage as a temporary solution.
+
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, Image, Save, Home, Bed, DollarSign, Box, FileText } from "lucide-react";
 
 const CreateRoom = () => {
@@ -7,6 +10,8 @@ const CreateRoom = () => {
     console.log(`Navigating to: ${path}`);
   };
   
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const [roomData, setRoomData] = useState({
     roomNumber: "",
     roomType: "",
@@ -31,21 +36,78 @@ const CreateRoom = () => {
     } else if (name === "images") {
       setRoomData((prev) => ({
         ...prev,
-        images: value.split(",").map((url) => url.trim()),
+        images: value.split(",").map((url) => url.trim()).filter(url => url),
       }));
     } else {
       setRoomData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  // Function to save room data to localStorage
+  const saveRoomToLocalStorage = (room) => {
+    try {
+      // Get existing rooms or initialize empty array
+      const existingRooms = JSON.parse(localStorage.getItem('hotel_rooms') || '[]');
+      
+      // Generate unique ID for the room
+      const newRoom = {
+        ...room,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString()
+      };
+      
+      // Add the new room
+      existingRooms.push(newRoom);
+      
+      // Save back to localStorage
+      localStorage.setItem('hotel_rooms', JSON.stringify(existingRooms));
+      
+      return newRoom;
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+      throw new Error('Failed to save room data');
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    
     try {
-      // Simulation of API call
-      console.log("Submitting room data:", roomData);
+      // Validate required fields
+      const requiredFields = ['roomNumber', 'roomType', 'bedType', 'price', 'size', 'description'];
+      for (const field of requiredFields) {
+        if (!roomData[field]) {
+          throw new Error(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
+        }
+      }
+      
+      // Check if room number already exists
+      const existingRooms = JSON.parse(localStorage.getItem('hotel_rooms') || '[]');
+      const roomExists = existingRooms.some(room => room.roomNumber === roomData.roomNumber);
+      
+      if (roomExists) {
+        throw new Error(`Room number ${roomData.roomNumber} already exists`);
+      }
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Save to localStorage
+      const savedRoom = saveRoomToLocalStorage(roomData);
+      console.log("Room created successfully:", savedRoom);
+      
+      // Show success message
+      alert("Room created successfully!");
+      
+      // Navigate to the rooms UI
       navigate("/roomsUI");
     } catch (err) {
       console.error("Creation failed:", err);
+      setError(err.message || "Failed to save room data. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -74,6 +136,14 @@ const CreateRoom = () => {
             </h1>
             <p className="text-blue-100 mt-2">Add a new room to your hotel inventory</p>
           </div>
+          
+          {/* Error message */}
+          {error && (
+            <div className="mx-8 mt-6 bg-red-50 border-l-4 border-red-500 p-4 text-red-700">
+              <p className="font-medium">Error</p>
+              <p>{error}</p>
+            </div>
+          )}
           
           {/* Form Section */}
           <div className="p-8">
@@ -230,16 +300,30 @@ const CreateRoom = () => {
                   type="button"
                   onClick={() => navigate("/roomsUI")}
                   className="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition flex items-center justify-center"
+                  disabled={isSubmitting}
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition flex items-center justify-center"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition flex items-center justify-center disabled:opacity-70"
                 >
-                  <Save className="w-4 h-4 mr-2" />
-                  Add Room
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Add Room
+                    </>
+                  )}
                 </button>
               </div>
             </form>

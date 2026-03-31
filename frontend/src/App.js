@@ -188,8 +188,6 @@ function App() {
               <Route path="/bills/:id/edit"  element={<ProtectedRoute element={< BillEditPage/>} requiredRole="admin" />} />
               
 
-              
-
               {/* Catch all */}
               <Route path="*" element={isAuthenticated ? <Navigate to="/" /> : <Navigate to="/login" />} />
             </Routes>

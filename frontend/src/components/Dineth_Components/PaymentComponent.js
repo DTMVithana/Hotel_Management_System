@@ -344,7 +344,7 @@ const PaymentComponent = ({ bookingId }) => {
                     )}
                   </button>
                   <button
-                    onClick={() => navigate("/BillTable")}
+                    onClick={() => navigate("/billTable")}
                     className="w-full p-3 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition duration-300 font-medium flex justify-center items-center"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

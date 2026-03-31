@@ -34,6 +34,18 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/booking-history", bookingHistoryRoutes);
 
 
+// ML prediction route proxy
+app.post("/api/hotel-predict", async (req, res) => {
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/predict", req.body);
+    res.json(response.data);
+  } catch (error) {
+    console.error("Prediction failed:", error.message);
+    res.status(500).json({ error: "Prediction failed" });
+  }
+});
+
+
 // Root route
 app.get("/", (req, res) => {
   res.send("Hotel Management API is running");

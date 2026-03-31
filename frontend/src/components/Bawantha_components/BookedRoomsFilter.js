@@ -1,64 +1,74 @@
+import React from "react";
 
-import React, { useState } from "react";
+export default function BookedRoomsFilter({
+  roomNumber,
+  setRoomNumber,
+  checkInDate,
+  setCheckInDate,
+  checkOutDate,
+  setCheckOutDate,
+  onFilter
+}) {
+  // whenever any field changes, call onFilter immediately
+  const handleRoomChange = (e) => {
+    const value = e.target.value;
+    setRoomNumber(value);
+    onFilter({ roomNumber: value, checkInDate, checkOutDate });
+  };
 
-const BookedRoomsFilter = ({ onFilter }) => {
-  const [roomNumber, setRoomNumber] = useState("");
-  const [checkInDate, setCheckInDate] = useState("");
-  const [checkOutDate, setCheckOutDate] = useState("");
+  const handleInDateChange = (e) => {
+    const value = e.target.value;
+    setCheckInDate(value);
+    onFilter({ roomNumber, checkInDate: value, checkOutDate });
+  };
 
-  const handleSearch = () => {
-    onFilter({
-      roomNumber,
-      checkInDate,
-      checkOutDate,
-    });
+  const handleOutDateChange = (e) => {
+    const value = e.target.value;
+    setCheckOutDate(value);
+    onFilter({ roomNumber, checkInDate, checkOutDate: value });
   };
 
   return (
-    <div className="flex items-center justify-between bg-white p-4 rounded-md w-full">
-      {/* Left/Middle Items in one group */}
-      <div className="flex items-center gap-4">
-        {/* Room Number Search */}
+    <div className="flex items-center gap-4 bg-white p-4 rounded-md w-full">
+      {/* Room Number */}
+      <input
+        type="text"
+        placeholder="Search by Room Number"
+        value={roomNumber}
+        onChange={handleRoomChange}
+        className="border border-gray-300 p-2 rounded w-60"
+      />
+
+      {/* Check-In Date */}
+      <div className="flex items-center gap-1">
+        <label className="font-medium text-gray-700">Check-In</label>
         <input
-          type="text"
-          placeholder="Search by Room Number"
-          value={roomNumber}
-          onChange={(e) => setRoomNumber(e.target.value)}
-          className="border border-gray-300 p-2 rounded-md focus:outline-none w-60 mr-12"
+          type="date"
+          value={checkInDate}
+          onChange={handleInDateChange}
+          className="border border-gray-300 p-2 rounded w-36"
         />
-
-        {/* Check-In */}
-        <div className="flex items-center gap-1">
-          <label className="font-medium text-gray-700">Check-In</label>
-          <input
-            type="date"
-            value={checkInDate}
-            onChange={(e) => setCheckInDate(e.target.value)}
-            className="border border-gray-300 p-2 rounded-md w-36 mr-12"
-          />
-        </div>
-
-        {/* Check-Out */}
-        <div className="flex items-center gap-2">
-          <label className="font-medium text-gray-700">Check-Out</label>
-          <input
-            type="date"
-            value={checkOutDate}
-            onChange={(e) => setCheckOutDate(e.target.value)}
-            className="border border-gray-300 p-2 rounded-md w-36"
-          />
-        </div>
       </div>
 
-      {/* Search Button on the Right */}
-      <button
-        onClick={handleSearch}
-        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
-      >
+      {/* Check-Out Date */}
+      <div className="flex items-center gap-1">
+        <label className="font-medium text-gray-700">Check-Out</label>
+        <input
+          type="date"
+          value={checkOutDate}
+          onChange={handleOutDateChange}
+          className="border border-gray-300 p-2 rounded w-36"
+        />
+      </div>
+
+       {/* Search Button */}
+       <button
+        onClick={() => onFilter({ roomNumber, checkInDate, checkOutDate })}
+        className="ml-auto bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+     >
         Search
       </button>
+
     </div>
   );
-};
-
-export default BookedRoomsFilter;
+}

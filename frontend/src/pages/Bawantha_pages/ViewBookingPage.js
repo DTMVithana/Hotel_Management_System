@@ -294,7 +294,9 @@ const ViewBookingPage = () => {
                       
                       <div className="flex gap-3">
                         <button
-                          onClick={() => navigate(`/edit-booking/${booking._id}`)}
+
+                        
+onClick={() => navigate(`/bookings/${booking._id}/edit`)}
                           className="px-6 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-md transition-colors flex-1 sm:flex-none"
                         >
                           Modify Booking
